@@ -2,4 +2,4 @@
 Web-based projects.
 
 
-<strong>Cinemap</strong> -> A movie search app using React, web APIs, HTML & CSS
+<strong>Cinemap</strong> -> A movie search app using React, web APIs, HTML & CSS, created as a university project in a team of 4.
