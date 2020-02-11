@@ -1,0 +1,133 @@
+@import url('https://fonts.googleapis.com/css?family=Bebas+Neue&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Carter+One&display=swap');
+
+
+
+
+.App {
+  text-align: center;
+  width: width;
+  height: 100%;
+
+}
+
+
+
+.App-logo {
+  height: 40vmin;
+}
+
+
+
+.App-header {
+  /*background-color: #282c34;*/
+  background-color:  darkred;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #09d3ac;
+}
+
+/*change this later with
+ * bootstrap, etc*/
+button {
+	display: block;
+	margin: auto;
+	width: 75%;
+	font-size: large;
+	min-height: 15%;
+}
+
+input {
+	margin: auto;
+	width: 75%;
+}
+
+select {
+  width: 75%;
+}
+
+
+h1 {
+  font-family: 'Bebas Neue', sans;
+  color: #fcd485;
+  text-shadow:
+    -1px -1px 0 #000,
+		3px -1px 0 #000,
+		-1px 3px 0 #000,
+		3px 3px 0 #000;
+}
+
+footer {
+  font-size: small;
+  background-color:  rgba(255, 255, 255, 0.3);
+}
+
+blockquote {
+  background-color: rgba(255, 255, 255, 0.1);
+  font-family: 'Carter One', serif;
+  width: 75%;
+  margin: auto;
+}
+
+table {
+  background-color: rgba(45, 19, 44, 0.80);
+  color: white;
+}
+
+th, td {
+  color: white;
+}
+
+.card {
+  color: black;
+}
+
+.btn-primary {
+
+  background-color: darkblue;
+}
+
+.btn-info {
+  color: black;
+  background-color: #42e6a4;
+}
+
+.btn-warning {
+  background-color: #f5dea3;
+}
+
+
+body {
+  color: white;
+}
+
+footer {
+  color: black;
+}
+
+a {
+  color: darkblue;
+}
+
+a.hover {
+  color: lightblue;
+}
+
+
+/*
+body {
+	background-image: url("./images/cinema.jpg");
+}
+
+h1, p, table {
+	color: white;
+}
+*/
