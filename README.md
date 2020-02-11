@@ -2,5 +2,4 @@
 Web-based projects.
 
 
-### Cinemap
-A movie search app using React, web APIs, HTML & CSS
+<strong>Cinemap</strong> -> A movie search app using React, web APIs, HTML & CSS
