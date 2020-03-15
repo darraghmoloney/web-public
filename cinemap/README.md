@@ -2,6 +2,7 @@
 
 ## A prototype movie/actor search app using [React](https://reactjs.org/), HTML & CSS with the [OpenMovieDB API](http://www.omdbapi.com/) & [TheMovieDB API](https://www.themoviedb.org/documentation/api).
 
+![Cinemap Main Page](https://github.com/darraghmoloney/web-public/blob/master/cinemap/screenshots/main_page.png)
 
 Features:
   - Specific Movie search & view extra details of each
