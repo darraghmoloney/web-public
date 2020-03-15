@@ -1,6 +1,6 @@
 # Cinemap
 
-## A prototype movie/actor search app using React, HTML & CSS with the OpenMovieDB API & TheMovieDB API.
+## A prototype movie/actor search app using [React](https://reactjs.org/), HTML & CSS with the [OpenMovieDB API](http://www.omdbapi.com/) & [TheMovieDB API](https://www.themoviedb.org/documentation/api).
 
 
 Features:
