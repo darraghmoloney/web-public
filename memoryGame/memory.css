@@ -1,0 +1,188 @@
+body {
+  font-family: 'Orbitron';
+}
+
+#main {
+  text-align: center;
+}
+
+#container {
+
+  position: relative;
+  border: 0.5rem transparent red;
+  padding: 10rem;
+  width: 3.75rem;
+  max-width: 3.75rem;
+
+  display: inline-block;
+}
+
+/*  Game status light */
+#indicator{
+  position: absolute;
+  border-radius: 50%;
+  background-color: red;
+  width: 0.5rem;
+  height: 0.5rem;
+  min-width: 0.3rem;
+  display: inline-block;
+  left: 48%;
+  top: 60%;
+}
+
+.circle {
+  position: absolute;
+  background-color: grey;
+  padding: 3.5rem;
+  border-radius: 50%;
+  border: 0.5rem solid black;
+}
+
+#centerCircle:before {
+  border-radius: inherit;
+  position: absolute;
+  top: 2.5%;
+  left: 2.5%;
+  height: 95%;
+  width: 95%;
+  content: '';
+  background-color: black;
+  opacity: 0.70;
+}
+
+/* Button shadow effect from
+https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_buttons_animate3
+*/
+.smallCircle {
+  box-shadow: 0 5px #999;
+
+}
+
+/*  Need this class to add button "click" affect
+*/
+.smallCircle:active {
+  /* box-shadow: 0 3px #666; */
+  /* transform: translateY(0.35rem); */
+}
+
+/* Gradient overlay for buttons based on:
+https://medium.com/@dave_lunny/animating-css-gradients-using-only-css-d2fd7671e759
+and
+https://www.colorzilla.com/gradient-editor/
+https://colorzilla.com/gradient-editor/#d8e0de+0,aebfbc+22,99afab+33,8ea6a2+50,829d98+6
+*/
+.smallCircle:before {
+  border-radius: inherit;
+  position: absolute;
+  top: 5%;
+  left: 5%;
+  background-image: radial-gradient(ellipse at center, rgba(216,224,222,1) 0%,
+    rgba(174,191,188,1) 22%,rgba(153,175,171,1) 33%,rgba(142,166,162,1) 50%,
+    rgba(130,157,152,1) 67%,rgba(78,92,90,1) 82%,rgba(14,14,14,1) 100%);
+  content: '';
+  display: block;
+  height: 90%;
+  width: 90%;
+  opacity: 35%;
+}
+
+/*  Separate class to disable pointer when clicking not allowed
+    -> (javascript add to classList)
+*/
+.hover:hover {
+  cursor: pointer;
+}
+
+/* Made into a separate class to disable click animation
+  until button flashes finished
+*/
+.click:active {
+  transform: translateY(0.35rem);
+}
+
+#greenCircle {
+  top: 0;
+  left: 0;
+  background-color: green;
+
+}
+
+#redCircle {
+  top: 0;
+  right: 0;
+  background-color: red;
+
+}
+
+/* Button shadow effect from
+https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_buttons_animate3
+*/
+#centerCircle {
+  top: 10%;
+  left: 15%;
+  padding: 8rem;
+  z-index: -1;
+  box-shadow: 0 9px #999;
+}
+
+#yellowCircle {
+  bottom: 0;
+  left: 0;
+  background-color: yellow;
+}
+
+#blueCircle {
+  bottom: 0;
+  right: 0;
+  background-color: blue;
+}
+
+
+#controlButtons {
+  display: inline-block;
+  position: absolute;
+  left: 22%;
+  top: 47%;
+  text-align: center;
+  user-select: none; /* Disallow selecting score text */
+}
+
+.score {
+  width: 2rem;
+  min-width: 2rem;
+  display: inline-block;
+  background-color: white;
+  font-weight: bold;
+}
+
+
+
+#startButton {
+  width: 5rem;
+  min-width: 9rem;
+  display: inline-block;
+  color: white;
+  background-color: black;
+
+}
+
+#startButton:hover {
+  background-color: darkorange;
+}
+
+/*  Animation code
+    based on https://www.w3docs.com/tools/code-editor/4007
+*/
+@keyframes flash {
+  0% {
+    /* box-shadow: 0 0 5px white; */
+  }
+
+  50% {
+    background-color: white;
+  }
+
+  100% {
+    /* box-shadow: 0 0 5px white; */
+  }
+}
