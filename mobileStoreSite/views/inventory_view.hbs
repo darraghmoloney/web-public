@@ -1,0 +1,349 @@
+<!-- This handlebars view is used to show the phones database for the mobile store, and is not rendered by default but on click of 
+    the Phones database choice button.
+    Like the customers view, it uses jQuery, AJAX & Bootstrap.
+-->
+<html lang="en">
+    
+    <head>
+        <meta charset="utf-8">
+        <title>Mobile Store</title>
+        <link href="/assets/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+        <link href="/assets/css/all.css" rel="stylesheet" type="text/css" />
+    </head>
+
+    <body>
+        <div class="container">
+            <!-- Option buttons to change the DB - default shown is customers -->
+            <h2><a class="breadcrumb-item text-dark" href="/">Phones Database</a></h2>
+            <button id="chooseCustomers" class="btn btn-primary">Customers</button>
+            <button id="choosePhones" class="btn btn-secondary">Phones</button>
+
+            <span class="badge badge-secondary" id="databaseFilterNotice"></span>
+            
+            
+
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <label class="input-group-text" for="inputGroupSelect01"><i class="fa fa-search"></i></label>
+                    <select class="custom-select" id="fieldSearchSelect">
+                        <option value="1" selected>Manufacturers</option> <!-- Toggle search type (make or model)-->
+                        <option value="2">Models</option>
+                    </select>
+                </div>
+                <input class="form-control py-2 border-left 0 border" type="search" placeholder="filter phones..." id="tableFilter">
+            </div>
+
+            <!-- Display the table header & if there are results from the API / jQuery filter, show their entries, too -->
+            <table class="table table-hover table-striped" id="inventoryList">
+                <thead>
+                    <tr>
+                        <th>Manufacturer</th>
+                        <th>Model</th>
+                        <th>Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each inventoryResults}}
+                    <tr>
+                        <td>{{manufacturer}}</td>
+                        <td>{{model}}</td>
+                        <td>{{price}}</td>
+                        <td class="text-right">
+                            <a href="javascript:void(0);" class="btn btn-sm btn-info update" data-id="{{id}}" data-name="{{manufacturer}} {{model}}">Update</a>
+                            <a href="javascript:void(0);" class="btn btn-sm btn-danger delete" data-id="{{id}}" data-name="{{manufacturer}} {{model}}">Delete</a>
+                        </td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+
+            <div class="input-group mb-3">
+                <button class="btn btn-primary mr-5" data-toggle="modal" data-target="#addModal">Add</button>
+
+            
+                <input class="form-control py-2 border-left 0 border" type="search" placeholder="search database..." id="databaseSearchFilter">
+                <div class="input-group-append">
+                    <button class="btn btn-success" type="button" id="databaseSearch">Find</button>
+                </div>
+            </div>    
+
+        </div>
+
+        <!-- Add a new item with the overlay modal dialog -->
+        <form id="addForm" action="/inventory" method="POST">
+            <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="inventoryModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="inventoryModalLabel">Add New Phone</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                {{!-- <span aria-hidden="true">$times;</span> --}}
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <h5>Phone Details</h5>
+                            <div class="form-group">
+                                <!-- Note that ALL entries are required - this is part of the DB design -->
+                                <input type="text" name="manufacturer" class="form-control" placeholder="Manufacturer*" required>
+                                <input type="text" name="model" class="form-control" placeholder="Model*" required>
+                                <input type="text" name="price" class="form-control" placeholder="Price*" required>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            {{!-- <p>Items marked with an asterisk (*) must be entered</p> --}}
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <!-- Update an existing item with the overlay modal dialog -->
+        <form id="updateForm" action="/inventory" method="PUT">
+            <div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="inventoryModalUpdateLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="inventoryModalUpdateLabel">Update Phone</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                {{!-- <span aria-hidden="true">&times;</span> --}}
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <div class="form-group">
+                                    <input type="text" name="manufacturer" class="form-control" placeholder="Manufacturer">
+                                    <input type="text" name="model" class="form-control" placeholder="Model">
+                                    <input type="text" name="price" class="form-control" placeholder="Price"> 
+                                </div>                                
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <input type="hidden" name="inventoryId" class="id">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Update</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        
+        </form>
+
+        <!-- Delete an existing item with the overlay modal dialog -->
+        <form id="deleteForm" action="/inventory" method="DELETE">
+            <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="inventoryModalDeleteLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="inventoryModalDeleteLabel">Delete Phone</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                {{!-- <span aria-hidden="true">&times;</span> --}}
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <strong>Are you sure you want to delete this Phone?</strong>
+                        </div>
+                        <div class="modal-footer">
+                            <input type="hidden" name="inventoryId" class="form-control id" required>
+                            <button type="submit" class="btn btn-success">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <!-- Successful operation modal dialog alert -->
+        <div class="modal fade" id="successAlert" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="alert alert-success" role="alert">
+                    <strong id="successModalLabel">Something happened! Good.</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Failed operation modal dialog alert -->
+        <div class="modal fade" id="errorAlert" tabindex="-1" role="dialog" aria-labelledby="failureModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="alert alert-danger" role="alert">
+                    <strong id="failureModalLabel">Well, that didn't work.</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Adding jQuery & Bootstrap to handle functions like filtering tables & sending
+            GET, POST, UPDATE & DELETE requests to the API
+         -->
+        <script src="/assets/js/jquery-3.5.1.js"></script>
+        <script src="/assets/js/bootstrap.bundle.min.js"></script>
+
+        <script>
+            $(document).ready(function() {
+
+                
+
+                /*  Use AJAX to create a virtual PUT method, for inventory updates from the modal dialog
+                    which call the RESTful API with PUT /inventory
+                 */
+                 var addForm = $("#addForm");
+                 addForm.submit(function(e) {
+                     e.preventDefault(); //Not using the standard POST
+                     $.ajax({
+                         type: addForm.attr('method'),
+                         url: addForm.attr('action'),
+                         data: addForm.serialize(), //Converts data elements to a string for submission
+                         
+                         success: function(data) {
+                             console.log(`Successfully added phone`);
+
+                             //Show the success alert, then reload all the inventory,
+                             //by redirecting the page to the inventory view again
+                             $('#successAlert').modal('show');
+                             var timer = setTimeout(function () {
+                                 $(location).attr('href', '/inventory')
+                             }, 2500);
+                         },
+                         error: function(data) {
+                             console.log(`Error adding phone`);
+
+                             $('#errorAlert').modal('show');
+                             var timer = setTimeout(function() {
+                                 $(location).attr('href', '/inventory')
+                             }, 2500);
+                         }
+                     });
+                     $('#addModal').modal('hide');
+                 });
+
+        ///     /*  Show the Update modal on click */    
+                $('#inventoryList').on('click', '.update', function() {
+                    
+                    var inventory_id = $(this).data('id');
+                    var inventory_name = $(this).data('name');
+                    {{!-- alert(`clicked update`) --}}
+                    $('#updateModal').modal('show');
+                    $('.name').val(inventory_name);
+                    $('.id').val(inventory_id);
+                });
+
+                /*  Send a PUT request using AJAX for Update modal */
+                var updateForm  = $("#updateForm");
+                updateForm.submit(function(e) {
+                    e.preventDefault();
+                    var id = updateForm.find('input[name="inventoryId"]').val();
+                    $.ajax({
+                        type: updateForm.attr('method'),
+                        url: updateForm.attr('action') + '/' + id,
+                        data: updateForm.serialize(),
+                        success: function(data) {
+                            console.log(`Update successful`);
+                            $('#successAlert').modal('show');
+                            var timer = setTimeout(function() {
+                                $(location).attr('href', '/inventory')
+                            }, 2500);
+                        },
+                        error: function(data) {
+                            console.log(`Update failed`);
+                            $('#errorAlert').modal('show');
+                            var timer = setTimeout(function() {
+                                $(location).attr('href', '/inventory')
+                            }, 2500);
+                        }
+                    });
+                    $('#updateModal').modal('hide');
+                });
+
+                /*  Show the delete modal */
+                $('#inventoryList').on('click', '.delete', function() {
+                    var inventory_id = $(this).data('id');
+                    var inventory_name = $(this).data('name');
+                    $("#deleteModal .modal-body").html(
+                        `<span class="font-weight-bold">Are you sure you want to delete phone ${inventory_name}?</span>`
+                    );
+                    $('#deleteModal').modal('show');
+                    $('.id').val(inventory_id);
+                });
+                
+                /*  AJAX call to REST API's DELETE  */
+                var deleteForm = $("#deleteForm");
+                deleteForm.submit(function(e) {
+                    e.preventDefault();
+                    var id = deleteForm.find('input[name="inventoryId"]').val();
+                    $.ajax({
+                        type: deleteForm.attr('method'),
+                        url: deleteForm.attr('action') + "/" + id,
+                        success: function(data) {
+                            console.log(`Deletion successful`);
+                            $('#successAlert').modal('show');
+                            var timer = setTimeout(function() {
+                                $(location).attr('href', '/inventory')
+                            }, 2500)
+                        },
+                        error: function(data) {
+                            console.log(`Error during delete attempt`);
+                            $('#errorAlert').modal('show');
+                            var timer = setTimeout(function() {
+                                $(location).attr('href', '/inventory')
+                            }, 2500);
+                        }
+                    });
+                    $('#deleteModal').modal('hide');
+                });
+
+          ///      /* Filter the pre-loaded results table */
+                $("#fieldSearchSelect").on("change", function() {
+                    var k = $(this).val();
+                    if(k == 1) {
+                        $("#tableFilter").attr("placeholder", "Filter By Name");
+                    } else {
+                        $("#tableFilter").attr("placeholder", "Filter By Address");
+                    }
+
+                    $("#tableFilter").keyup();
+                });
+
+                $("#tableFilter").keyup(function() {
+                    var filter = $(this).val().toUpperCase();
+                    $('#inventoryList').find('tr').each(function(rows) {
+                        if(rows !== 0) {
+                            var row = $(this);
+                            var searching = "";
+                            if($("#fieldSearchSelect").val() == 1) {
+                                searching = row.find("td:first").text().toUpperCase();
+                            } else {
+                                searching = row.find("td:first + td").text().toUpperCase();
+                            }
+                            if(searching.indexOf(filter) != -1) {
+                                row.show();
+                            } else {
+                                row.hide();
+                            }
+                        }
+                    })
+                })
+
+        ///        /*  Make RESTful call to search database directly (more advanced queries) */
+                $("#databaseSearch").on('click', function() {
+                    var search = $("#databaseSearchFilter").val().replace(/[|&;$%@"<>()+,^ "]/, "");
+                    if(search) {
+                        
+                            $(location).attr('href', `/inventory/search/${search}`);
+                        
+                        
+                        
+                    } else {
+                        $(location).attr('href', '/inventory'); //If no search is entered, just go back to main view
+                    }
+                })
+
+                $("#chooseCustomers").on('click', function() { //This function changes the handlebars view to the root customers page
+                    $(location).attr('href', '/');
+                })
+
+            })
+        </script>
+
+        
+          
+    </body>
+</html>

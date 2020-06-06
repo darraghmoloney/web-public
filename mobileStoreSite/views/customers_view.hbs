@@ -1,0 +1,391 @@
+<!-- The main entry page for the app. Set to display the customer results. Rendered through handlebars with
+API fetches for data display. jQuery used for click handlers, etc. AJAX is used to translate requests to the API
+server as only POST & GET can directly be used through pure HTML.
+Bootstrap styling used. -->
+
+<html lang="en">
+    
+    <head>
+        <meta charset="utf-8">
+        <title>Mobile Store</title>
+        <link href="/assets/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+        <link href="/assets/css/all.css" rel="stylesheet" type="text/css" />
+    </head>
+
+    <body>
+        <div class="container">
+            <!--Show where we are and allow changing of database view to see the Phones DB by clicking on a button -->
+            <h2><a class="breadcrumb-item text-dark" href="/" style="margin: auto">Customers Database</a></h2>
+            <button id="chooseCustomers" class="btn btn-primary">Customers</button>
+            <button id="choosePhones" class="btn btn-secondary">Phones</button>
+            <span class="badge badge-secondary" id="databaseFilterNotice"></span>
+
+            
+
+            <!-- This is the basic filter search, that will use jQuery to search results displayed on the page. 
+                An advanced DB search actually queries the mongoDB at the bottom of the page.
+                The usefulness of this is that in for example a large DB, you could display only the first 20 etc
+                results on the page, but still search through them without needing to call the database, saving
+                resources & time. 
+                Here, it's also useful to have a separate search because the DB backend actually contains more data than
+                is displayed in the table - for example, the eircode in the address is not displayed, but can still
+                be searched in the advanced DB search section.
+             -->
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <label class="input-group-text" for="inputGroupSelect01"><i class="fa fa-search"></i></label>
+                    <select class="custom-select" id="fieldSearchSelect">
+                        <option value="1" selected>Names</option>
+                        <option value="2">Addresses</option>
+                    </select>
+                </div>
+                <input class="form-control py-2 border-left 0 border" type="search" placeholder="filter customers..." id="tableFilter">
+            </div>
+
+            <!-- Display the table header & if there are results from the API / jQuery filter, show their entries, too -->
+            <table class="table table-hover table-striped" id="customersList">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Address</th>
+                        <th>Options</th> <!-- Options table entry is used for Update & Delete buttons -->
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each customerResults}} <!-- Handlebars #each cleverly loops through all the JSON data automatically, displaying it if it exists -->
+                    <tr>
+                        <td>{{title}}</td>
+                        <td>{{firstname}} {{surname}}</td>
+                        <td>{{email}}</td>
+                        <td>{{mobile}}</td>
+                        <td>{{address.line1}}, {{address.town}}, {{address.county_city}}</td>
+                        <td class="text-right">
+                            <!-- Update & delete buttons. Note the id parameter cleverly passed in allowing DB update & delete.-->
+                            <a href="javascript:void(0);" class="btn btn-sm btn-info update" data-id="{{id}}" data-name="{{firstname}} {{surname}}">Update</a>
+                            <a href="javascript:void(0);" class="btn btn-sm btn-danger delete" data-id="{{id}}" data-name="{{firstname}} {{surname}}">Delete</a>
+                        </td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+
+            <div class="input-group mb-3">
+                <button class="btn btn-primary mr-5" data-toggle="modal" data-target="#addModal">Add</button>
+
+                <!-- The advanced, full DB search that checks the database itself, with options to search for the address or the name -->
+                <div class="input-group-prepend">
+                    <select class="custom-select" id="databaseSearchSelect">
+                        <option value="customer" selected>Names</option>
+                        <option value="address">Addresses</option>
+                    </select>
+                </div>
+                <input class="form-control py-2 border-left 0 border" type="search" placeholder="search database..." id="databaseSearchFilter">
+                <div class="input-group-append">
+                    <button class="btn btn-success" type="button" id="databaseSearch">Find</button>
+                </div>
+            </div>    
+
+        </div>
+
+        <!-- Add a new customer with the overlay modal dialog -->
+        <form id="addForm" action="/customers" method="POST">
+            <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="customerModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="customerModalLabel">Add New Customer</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                {{!-- <span aria-hidden="true">$times;</span> --}}
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <h5>Personal Details</h5>
+                            <div class="form-group">
+                                <input type="text" name="title" class="form-control" placeholder="Title">
+                                <input type="text" name="firstname" class="form-control" placeholder="First Name*" required>
+                                <input type="text" name="surname" class="form-control" placeholder="Surname*" required>
+                                <input type="text" name="mobile" class="form-control" placeholder="Phone number*" required>
+                                <input type="email" name="email" class="form-control" placeholder="Email*" required>
+                            </div>
+                            <h5>Address</h5>
+                            <div class="form-group">
+                                <input type="text" name="line1" class="form-control" placeholder="Address Line 1*" required>
+                                <input type="text" name="line2" class="form-control" placeholder="Address Line 2">
+                                <input type="text" name="town" class="form-control" placeholder="Town / City*" required>
+                                <input type="text" name="county_city" class="form-control" placeholder="County*" required>
+                                <input type="text" name="eircode" class="form-control" placeholder="Eircode">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            {{!-- <p>Items marked with an asterisk (*) must be entered</p> --}}
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <!-- Update an existing customer with the overlay modal dialog -->
+        <form id="updateForm" action="/customers" method="PUT">
+            <div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="customerModalUpdateLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="customerModalUpdateLabel">Update Customer</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                {{!-- <span aria-hidden="true">&times;</span> --}}
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <div class="form-group">
+                                    <input type="text" name="title" class="form-control" placeholder="Title">
+                                    <input type="text" name="firstname" class="form-control" placeholder="First Name">
+                                    <input type="text" name="surname" class="form-control" placeholder="Surname">
+                                    <input type="text" name="mobile" class="form-control" placeholder="Phone number">
+                                    <input type="email" name="email" class="form-control" placeholder="Email">
+                                </div>
+                                <h5>Address</h5>
+                                <div class="form-group">
+                                    <input type="text" name="line1" class="form-control" placeholder="Address Line 1">
+                                    <input type="text" name="line2" class="form-control" placeholder="Address Line 2">
+                                    <input type="text" name="town" class="form-control" placeholder="Town / City">
+                                    <input type="text" name="county_city" class="form-control" placeholder="County">
+                                    <input type="text" name="eircode" class="form-control" placeholder="Eircode">
+                                </div>
+                                
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <input type="hidden" name="customerId" class="id">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Update</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        
+        </form>
+
+        <!-- Delete an existing customer with the overlay modal dialog -->
+        <form id="deleteForm" action="/customers" method="DELETE">
+            <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="customerModalDeleteLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="customerModalDeleteLabel">Delete Customer</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                {{!-- <span aria-hidden="true">&times;</span> --}}
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <strong>Are you sure you want to delete this Customer?</strong>
+                        </div>
+                        <div class="modal-footer">
+                            <input type="hidden" name="customerId" class="form-control id" required>
+                            <button type="submit" class="btn btn-success">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <!-- Successful operation modal dialog alert -->
+        <div class="modal fade" id="successAlert" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="alert alert-success" role="alert">
+                    <strong id="successModalLabel">Something happened! Good.</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Failed operation modal dialog alert -->
+        <div class="modal fade" id="errorAlert" tabindex="-1" role="dialog" aria-labelledby="failureModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="alert alert-danger" role="alert">
+                    <strong id="failureModalLabel">Well, that didn't work.</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Adding jQuery & Bootstrap to handle functions like filtering tables & sending
+            GET, POST, UPDATE & DELETE requests to the API
+         -->
+        <script src="/assets/js/jquery-3.5.1.js"></script>
+        <script src="/assets/js/bootstrap.bundle.min.js"></script>
+
+        <script>
+            $(document).ready(function() {
+
+                
+
+                /*  Use AJAX to create a virtual PUT method, for customer updates from the modal dialog
+                    which call the RESTful API with PUT /customers
+                 */
+                 var addForm = $("#addForm");
+                 addForm.submit(function(e) {
+                     e.preventDefault(); //Not using the standard POST
+                     $.ajax({
+                         type: addForm.attr('method'),
+                         url: addForm.attr('action'),
+                         data: addForm.serialize(), //Converts data elements to a string for submission
+                         
+                         success: function(data) {
+                             console.log(`Successfully added customer`);
+
+                             //Show the success alert, then reload all the customers,
+                             //by redirecting the page to the root screen again
+                             $('#successAlert').modal('show');
+                             var timer = setTimeout(function () {
+                                 $(location).attr('href', '/')
+                             }, 2500);
+                         },
+                         error: function(data) {
+                             console.log(`Error adding customer`);
+
+                             $('#errorAlert').modal('show');
+                             var timer = setTimeout(function() {
+                                 $(location).attr('href', '/')
+                             }, 2500);
+                         }
+                     });
+                     $('#addModal').modal('hide');
+                 });
+
+        ///     /*  Show the Update modal on click */    
+                $('#customersList').on('click', '.update', function() {
+                    
+                    var customer_id = $(this).data('id');
+                    var customer_name = $(this).data('name');
+                    {{!-- alert(`clicked update`) --}}
+                    $('#updateModal').modal('show');
+                    $('.name').val(customer_name);
+                    $('.id').val(customer_id);
+                });
+
+                /*  Send a PUT request using AJAX for Update modal */
+                var updateForm  = $("#updateForm");
+                updateForm.submit(function(e) {
+                    e.preventDefault();
+                    var id = updateForm.find('input[name="customerId"]').val();
+                    $.ajax({
+                        type: updateForm.attr('method'),
+                        url: updateForm.attr('action') + '/' + id,
+                        data: updateForm.serialize(),
+                        success: function(data) {
+                            console.log(`Update successful`);
+                            $('#successAlert').modal('show');
+                            var timer = setTimeout(function() {
+                                $(location).attr('href', '/')
+                            }, 2500);
+                        },
+                        error: function(data) {
+                            console.log(`Update failed`);
+                            $('#errorAlert').modal('show');
+                            var timer = setTimeout(function() {
+                                $(location).attr('href', '/')
+                            }, 2500);
+                        }
+                    });
+                    $('#updateModal').modal('hide');
+                });
+
+                /*  Show the delete modal */
+                $('#customersList').on('click', '.delete', function() {
+                    var customer_id = $(this).data('id');
+                    var customer_name = $(this).data('name');
+                    $("#deleteModal .modal-body").html(
+                        `<span class="font-weight-bold">Are you sure you want to delete customer ${customer_name}?</span>`
+                    );
+                    $('#deleteModal').modal('show');
+                    $('.id').val(customer_id);
+                });
+                
+                /*  AJAX call to REST API's DELETE  */
+                var deleteForm = $("#deleteForm");
+                deleteForm.submit(function(e) {
+                    e.preventDefault();
+                    var id = deleteForm.find('input[name="customerId"]').val();
+                    $.ajax({
+                        type: deleteForm.attr('method'),
+                        url: deleteForm.attr('action') + "/" + id,
+                        success: function(data) {
+                            console.log(`Deletion successful`);
+                            $('#successAlert').modal('show');
+                            var timer = setTimeout(function() {
+                                $(location).attr('href', '/')
+                            }, 2500)
+                        },
+                        error: function(data) {
+                            console.log(`Error during delete attempt`);
+                            $('#errorAlert').modal('show');
+                            var timer = setTimeout(function() {
+                                $(location).attr('href', '/')
+                            }, 2500);
+                        }
+                    });
+                    $('#deleteModal').modal('hide');
+                });
+
+          ///      /* Filter the pre-loaded results table */
+                $("#fieldSearchSelect").on("change", function() {
+                    var k = $(this).val();
+                    if(k == 1) {
+                        $("#tableFilter").attr("placeholder", "Filter By Name");
+                    } else {
+                        $("#tableFilter").attr("placeholder", "Filter By Address");
+                    }
+
+                    $("#tableFilter").keyup();
+                });
+
+                $("#tableFilter").keyup(function() {
+                    var filter = $(this).val().toUpperCase();
+                    $('#customersList').find('tr').each(function(rows) {
+                        if(rows !== 0) {
+                            var row = $(this);
+                            var searching = "";
+                            if($("#fieldSearchSelect").val() == 1) {
+                                searching = row.find("td:first + td").text().toUpperCase();
+                            } else {
+                                searching = row.find("td:first + td + td + td + td").text().toUpperCase();
+                            }
+                            if(searching.indexOf(filter) != -1) {
+                                row.show();
+                            } else {
+                                row.hide();
+                            }
+                        }
+                    })
+                })
+
+        ///        /*  Make RESTful call to search database directly (more advanced queries) */
+                $("#databaseSearch").on('click', function() {
+                    var search = $("#databaseSearchFilter").val().replace(/[|&;$%@"<>()+,^ "]/, "");
+                    if(search) {
+                        if($("#databaseSearchSelect").val() == 'customer') {
+                            $(location).attr('href', `/customers/search/${search}`);
+                        } else {
+                            $(location).attr('href', `/customers/search/addresses/${search}`);
+                        }
+                        
+                    } else {
+                        $(location).attr('href', '/');
+                    }
+                })
+
+                $("#choosePhones").on('click', function() {
+                    $(location).attr('href', '/inventory');
+                })
+
+            })
+        </script>
+
+        
+          
+    </body>
+</html>
